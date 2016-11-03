@@ -1,0 +1,18 @@
+//tag::ref-doc[]
+= Filter Processor
+Use the filter module in a stream to determine whether a Message should be passed to the output channel.
+
+== Options
+
+The **$$filter$$** $$processor$$ has the following options:
+
+//tag::configuration-properties[]
+$$filter.expression$$:: $$A SpEL expression to be evaluated against each message, to decide whether or not to accept it.$$ *($$Expression$$, default: `$$true$$`)*
+//end::configuration-properties[]
+
+//end::ref-doc[]
+== Building with Maven
+
+```
+$> mvn package
+```
