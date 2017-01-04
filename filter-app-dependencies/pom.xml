@@ -6,7 +6,7 @@
     <version>1.1.2.BUILD-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>filter-app-dependencies</name>
-    <description>Spring Cloud Stream Trigger App Dependencies</description>
+    <description>Spring Cloud Stream Filter App Dependencies</description>
 
     <parent>
 	<artifactId>spring-cloud-dependencies-parent</artifactId>
