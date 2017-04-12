@@ -19,6 +19,7 @@ package org.springframework.cloud.stream.app.filter.processor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
 
@@ -29,6 +30,7 @@ import javax.validation.constraints.NotNull;
  * @author Gary Russell
  */
 @ConfigurationProperties("filter")
+@Validated
 public class FilterProcessorProperties {
 
 	private static final Expression DEFAULT_EXPRESSION = new SpelExpressionParser().parseExpression("true");
