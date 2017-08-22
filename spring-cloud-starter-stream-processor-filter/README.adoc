@@ -1,6 +1,27 @@
 //tag::ref-doc[]
 = Filter Processor
+
 Use the filter module in a stream to determine whether a Message should be passed to the output channel.
+
+== Input
+
+=== Headers
+
+N/A
+
+=== Payload
+
+Any
+
+== Output
+
+=== Headers
+
+N/A
+
+=== Payload
+
+Any
 
 == Options
 
@@ -11,8 +32,20 @@ $$filter.expression$$:: $$A SpEL expression to be evaluated against each message
 //end::configuration-properties[]
 
 //end::ref-doc[]
-== Building with Maven
+== Build
 
 ```
-$> mvn package
+$ ./mvnw clean install -PgenerateApps
+$ cd apps
+
+You can find the corresponding binder based projects here. You can then cd into one one of the folders and
+build it:
+
+$ ./mvnw clean package
+```
+
+== Examples
+
+```
+java -jar filter-processor.jar --expression="payload"
 ```
