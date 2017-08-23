@@ -11,7 +11,7 @@ N/A
 
 === Payload
 
-Spring Integration Message
+Any
 
 == Output
 
@@ -21,7 +21,7 @@ N/A
 
 === Payload
 
-Spring Integration Message
+Any
 
 == Options
 
