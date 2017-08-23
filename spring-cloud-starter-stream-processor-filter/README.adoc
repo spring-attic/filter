@@ -47,5 +47,5 @@ $ ./mvnw clean package
 == Examples
 
 ```
-java -jar filter-processor.jar
+java -jar filter-processor.jar --expression="payload"
 ```
