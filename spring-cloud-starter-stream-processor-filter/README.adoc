@@ -31,7 +31,6 @@ The **$$filter$$** $$processor$$ has the following options:
 $$filter.expression$$:: $$A SpEL expression to be evaluated against each message, to decide whether or not to accept it.$$ *($$Expression$$, default: `$$true$$`)*
 //end::configuration-properties[]
 
-//end::ref-doc[]
 == Build
 
 ```
@@ -49,3 +48,5 @@ $ ./mvnw clean package
 ```
 java -jar filter-processor.jar --expression="payload"
 ```
+
+//end::ref-doc[]
