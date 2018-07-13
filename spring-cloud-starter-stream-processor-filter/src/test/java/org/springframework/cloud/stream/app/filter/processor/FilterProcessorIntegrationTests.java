@@ -1,5 +1,5 @@
 /*
- * Copyright 2015-2016 the original author or authors.
+ * Copyright 2015-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.cloud.stream.app.filter.processor;
 
+import java.util.HashMap;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -23,12 +26,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.annotation.Bindings;
+import org.springframework.cloud.stream.converter.TupleJsonMessageConverter;
 import org.springframework.cloud.stream.messaging.Processor;
 import org.springframework.cloud.stream.test.binder.MessageCollector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.tuple.Tuple;
+import org.springframework.tuple.TupleBuilder;
+import org.springframework.util.MimeType;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
@@ -42,6 +51,7 @@ import static org.springframework.cloud.stream.test.matcher.MessageQueueMatcher.
  * @author Eric Bottard
  * @author Marius Bogoevici
  * @author Gary Russell
+ * @author Christian Tzolov
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @DirtiesContext
@@ -80,6 +90,62 @@ public abstract class FilterProcessorIntegrationTests {
 			channels.input().send(new GenericMessage<Object>("hello world"));
 			channels.input().send(new GenericMessage<Object>("hi!"));
 			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is("hello world")));
+			assertThat(collector.forChannel(channels.output()).poll(10, MILLISECONDS), is(nullValue(Message.class)));
+		}
+
+		@Test
+		public void testTextContentTypeWithOctetPayload() throws InterruptedException {
+			Message<byte[]> message1 = MessageBuilder.withPayload("hello".getBytes())
+					.setHeader("contentType", new MimeType("text")).build();
+			Message<byte[]> message2 = MessageBuilder.withPayload("hello world".getBytes())
+					.setHeader("contentType", new MimeType("text")).build();
+			Message<byte[]> message3 = MessageBuilder.withPayload("hi!".getBytes())
+					.setHeader("contentType", new MimeType("text")).build();
+
+			channels.input().send(message1);
+			channels.input().send(message2);
+			channels.input().send(message3);
+			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is("hello world")));
+			assertThat(collector.forChannel(channels.output()).poll(10, MILLISECONDS), is(nullValue(Message.class)));
+		}
+	}
+
+	@SpringBootTest("filter.expression=#jsonPath(payload,'$.foo')=='bar'")
+	public static class OctetPayloadForJsonTupleContentTypesTests extends FilterProcessorIntegrationTests {
+
+		@Test
+		public void testJsonFilterMatch() {
+			byte[] payloadMatch = "{\"foo\":\"bar\"}".getBytes();
+			Message<byte[]> message = MessageBuilder.withPayload(payloadMatch)
+					.setHeader("contentType", new MimeType("json")).build();
+			channels.input().send(message);
+			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is(payloadMatch)));
+		}
+
+		@Test
+		public void testJsonFilterNotMatch() throws InterruptedException {
+			byte[] payloadNotMatch = "{\"foo\":\"NotBar\"}".getBytes();
+			Message<byte[]> messageNotMatch = MessageBuilder.withPayload(payloadNotMatch)
+					.setHeader("contentType", new MimeType("json")).build();
+			channels.input().send(messageNotMatch);
+			assertThat(collector.forChannel(channels.output()).poll(10, MILLISECONDS), is(nullValue(Message.class)));
+		}
+
+		@Test
+		public void testTupleMatch() {
+			Tuple tuple = TupleBuilder.tuple().of("foo", "bar");
+			Message<byte[]> message = (Message<byte[]>) new TupleJsonMessageConverter(
+					new ObjectMapper()).toMessage(tuple, new MessageHeaders(new HashMap<>()));
+			channels.input().send(message);
+			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is("{\"foo\":\"bar\"}".getBytes())));
+		}
+
+		@Test
+		public void testTupleNotMatch() throws InterruptedException {
+			Tuple tuple = TupleBuilder.tuple().of("foo", "NotBar");
+			Message<byte[]> message = (Message<byte[]>) new TupleJsonMessageConverter(
+					new ObjectMapper()).toMessage(tuple, new MessageHeaders(new HashMap<>()));
+			channels.input().send(message);
 			assertThat(collector.forChannel(channels.output()).poll(10, MILLISECONDS), is(nullValue(Message.class)));
 		}
 	}
