@@ -96,11 +96,11 @@ public abstract class FilterProcessorIntegrationTests {
 		@Test
 		public void testTextContentTypeWithOctetPayload() throws InterruptedException {
 			Message<byte[]> message1 = MessageBuilder.withPayload("hello".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader("contentType", new MimeType("text", "plain")).build();
 			Message<byte[]> message2 = MessageBuilder.withPayload("hello world".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader("contentType", new MimeType("text", "plain")).build();
 			Message<byte[]> message3 = MessageBuilder.withPayload("hi!".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader("contentType", new MimeType("text", "plain")).build();
 
 			channels.input().send(message1);
 			channels.input().send(message2);
