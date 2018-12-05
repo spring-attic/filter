@@ -37,7 +37,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.tuple.Tuple;
 import org.springframework.tuple.TupleBuilder;
-import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.CoreMatchers.is;
@@ -96,11 +96,11 @@ public abstract class FilterProcessorIntegrationTests {
 		@Test
 		public void testTextContentTypeWithOctetPayload() throws InterruptedException {
 			Message<byte[]> message1 = MessageBuilder.withPayload("hello".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 			Message<byte[]> message2 = MessageBuilder.withPayload("hello world".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 			Message<byte[]> message3 = MessageBuilder.withPayload("hi!".getBytes())
-					.setHeader("contentType", new MimeType("text")).build();
+					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.TEXT_PLAIN).build();
 
 			channels.input().send(message1);
 			channels.input().send(message2);
@@ -117,16 +117,16 @@ public abstract class FilterProcessorIntegrationTests {
 		public void testJsonFilterMatch() {
 			byte[] payloadMatch = "{\"foo\":\"bar\"}".getBytes();
 			Message<byte[]> message = MessageBuilder.withPayload(payloadMatch)
-					.setHeader("contentType", new MimeType("json")).build();
+					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
 			channels.input().send(message);
-			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is(payloadMatch)));
+			assertThat(collector.forChannel(channels.output()), receivesPayloadThat(is(new String(payloadMatch))));
 		}
 
 		@Test
 		public void testJsonFilterNotMatch() throws InterruptedException {
 			byte[] payloadNotMatch = "{\"foo\":\"NotBar\"}".getBytes();
 			Message<byte[]> messageNotMatch = MessageBuilder.withPayload(payloadNotMatch)
-					.setHeader("contentType", new MimeType("json")).build();
+					.setHeader(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON).build();
 			channels.input().send(messageNotMatch);
 			assertThat(collector.forChannel(channels.output()).poll(10, MILLISECONDS), is(nullValue(Message.class)));
 		}
